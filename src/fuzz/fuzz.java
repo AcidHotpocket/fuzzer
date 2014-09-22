@@ -9,12 +9,21 @@ public class fuzz {
 	 * This program will scan a given web page and all of it's connecting pages for it's
 	 * 	inputs. After, it will either list all inputs and input types to the terminal or
 	 * 	will test inputs with provided attack vectors.
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		
 		boolean areTesting;
 		URL startingPage;
+		BufferedReader reader;
+		
+		/*-------------------------------------------------------------------
+		 * Checks to see if the minimum number of parameters are applied and if
+		 * the first parameter is either "discover" or "test". If either of these
+		 * checks fail, an error is thrown and the man page is printed before 
+		 * terminating the program. 
+		 -----------------------------------------------------------------------*/
 		
 		if(args.length < 2) {
 			System.out.println("Error: too few parameters");
@@ -32,14 +41,22 @@ public class fuzz {
 			System.exit(1);
 		}
 
+		// attempt to take the second argument and turn it into a URL object.
+		
 		try {
 			startingPage = new URL(args[1]);
+			System.out.println("It's a url all right!");
 		}catch(MalformedURLException e) {
-			System.err.println("Error: Invalid URL");
+			System.out.println("Error: Invalid URL");
 			manMessage();
 			System.exit(1);
 		} 
 		
+		if((args.length >= 3) && (args[0].equals("discover"))) {
+			System.out.println("there are more parameters for discovering!");
+		}else if((args.length >= 3) && (args[0].equals("test"))) {
+			System.out.println("there are more parameters for testing!");
+		}
 	}
 	
 	/*----------------------------------------------------------------------------
