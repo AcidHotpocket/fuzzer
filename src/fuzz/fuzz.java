@@ -14,7 +14,7 @@ public class fuzz {
 	 */
 	public static void main(String[] args) {
 		
-		boolean areTesting;
+		boolean areTesting = false;
 		URL startingPage;
 		BufferedReader reader;
 		
@@ -26,7 +26,7 @@ public class fuzz {
 		 -----------------------------------------------------------------------*/
 		
 		if(args.length < 2) {
-			System.out.println("Error: too few parameters");
+			System.err.println("Error: too few parameters");
 			manMessage();
 			System.exit(1);
 		}else if(args[0].equals("discover")) {
@@ -36,7 +36,7 @@ public class fuzz {
 			System.out.println("We testing!");
 			areTesting = true;
 		}else {
-			System.out.println("Error: first argument must be \"discover\" or \"test\"");
+			System.err.println("Error: first argument must be \"discover\" or \"test\"");
 			manMessage();
 			System.exit(1);
 		}
@@ -47,14 +47,29 @@ public class fuzz {
 			startingPage = new URL(args[1]);
 			System.out.println("It's a url all right!");
 		}catch(MalformedURLException e) {
-			System.out.println("Error: Invalid URL");
+			System.err.println("Error: Invalid URL");
 			manMessage();
 			System.exit(1);
 		} 
 		
-		if((args.length >= 3) && (args[0].equals("discover"))) {
+		//Attempt to parse the rest of the parameters. Will attempt to get different
+		//parameters depending on which command was used.
+		
+		if((args.length >= 3) && !areTesting) {
 			System.out.println("there are more parameters for discovering!");
-		}else if((args.length >= 3) && (args[0].equals("test"))) {
+			
+			for(int i = 2; i < args.length; i++) {
+				if (args[i].contains("--common-words")) {
+					System.out.println("we getting common words!");
+				} else if(args[i].contains("--custom-auth")) {
+					System.out.println("using the hardcoded authentication!");
+				} else {
+					System.err.println("Error: invalid option " + args[i]);
+					manMessage();
+					System.exit(1);
+				}
+			}
+		}else if((args.length >= 3) && areTesting) {
 			System.out.println("there are more parameters for testing!");
 		}
 	}
@@ -65,29 +80,29 @@ public class fuzz {
 	 -----------------------------------------------------------------------------*/
 	
 	private static void manMessage() {
-		System.out.println("fuzz [discover | test] url OPTIONS\n");
-		System.out.println("COMMANDS:");
-		System.out.println("	discover - Output a comprehensive, " +
+		System.err.println("fuzz [discover | test] url OPTIONS\n");
+		System.err.println("COMMANDS:");
+		System.err.println("	discover - Output a comprehensive, " +
 				"human-readable list of all discovered inputs " +
 				"to the system.");
-		System.out.println("	test - Discover all inputs, then attempt a " +
+		System.err.println("	test - Discover all inputs, then attempt a " +
 				"list of exploit vectors on those inputs\n");
-		System.out.println("OPTIONS:");
-		System.out.println("	--custom-auth=string - Signal that the fuzzer should use " +
+		System.err.println("OPTIONS:");
+		System.err.println("	--custom-auth=string - Signal that the fuzzer should use " +
 				"hard-coded authentication for a specific application\n");
-		System.out.println("	Discover options:");
-		System.out.println("		--common-words=file - Newline-delimited " +
+		System.err.println("	Discover options:");
+		System.err.println("		--common-words=file - Newline-delimited " +
 				"file of common words to be used in " +
 				"page guessing and input guessing.\n");
-		System.out.println("	Test options:");
-		System.out.println("		--vectors=file - Newline-delimited file of " +
+		System.err.println("	Test options:");
+		System.err.println("		--vectors=file - Newline-delimited file of " +
 				"common exploits to vulnerabilities.");
-		System.out.println("		--sensitive=file - Newline-delimited file data " +
+		System.err.println("		--sensitive=file - Newline-delimited file data " +
 				"that should never be leaked.");
-		System.out.println("		--random=[true|false] - When off, try each input to each " +
+		System.err.println("		--random=[true|false] - When off, try each input to each " +
 				"page systematically. When on, choose a random page, then a random input " +
 				"field and test all vectors. Default: false");
-		System.out.println("		--slow=500 - Number of milliseconds considered when a response " +
+		System.err.println("		--slow=500 - Number of milliseconds considered when a response " +
 				"is considered \"slow\". Default is 500 milliseconds");
 		
 	}
