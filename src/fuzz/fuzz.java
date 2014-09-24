@@ -1,8 +1,5 @@
 package fuzz;
 
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.gargoylesoftware.htmlunit.html.HtmlForm;
-
 public class fuzz {
 
 	/**
@@ -66,6 +63,8 @@ public class fuzz {
 		//after initializing, use the logIn method and then begin fuzzing I think
 		
 		fuzzer = new Fuzzer(commonWordsFilename);
+		fuzzer.logIn(customAuthorize);
+		fuzzer.fuzz(startingPagename);
 	}
 	
 	/*----------------------------------------------------------------------------
