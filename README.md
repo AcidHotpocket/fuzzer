@@ -4,9 +4,9 @@ The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-3
 
 <b>Project Team:</b>
 <ul>
-	<li>Zackery Martin <i>zlm2353@rit.edu<i> <br></li>
-	<li>Richard Jester <i>rej7869@rit.edu<i> <br></li>
-	<li>Dennis Liang <i>dxl1795@rit.edu<i></li>
+	<li>Zackery Martin - <i>zlm2353@rit.edu<i> <br></li>
+	<li>Richard Jester - <i>rej7869@rit.edu<i> <br></li>
+	<li>Dennis Liang - <i>dxl1795@rit.edu<i></li>
 </ul><br>
 
 <b>Installation</b><br>
