@@ -11,15 +11,14 @@ The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-3
 
 <b>Installation</b><br>
 <ol>
-	<li>step1</li>
-	<li>step2</li>
+	<li>Copy this repository to your workspace</li>
+	<li>Run program from the command line</li>
 </ol>
 
 <b>Project Setup</b><br>
-<ol>
-	<li>step1</li>
-	<li>step2</li>
-</ol>
+<ul>
+	<li>Testing, input discovery, resources is all in the package.</li>
+</ul>
 
 <b>Dependencies</b><br>
 <ul>
@@ -29,4 +28,12 @@ The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-3
 
 <b>Example usage</b><br>
 
-"replace this with an example from the command line"
+"replace this with an example from the command line"<br>
+
+  java fuzz test http://localhost:8080 --custom-auth=dvwa --common-words=words.txt --vectors=vectors.txt --sensitive=creditcards.txt --random=false<br>
+  java fuzz discover http://localhost:8080 --common-words=mywords.txt<br>
+  java fuzz discover http://localhost:8080 --common-words=mywords.txt<br>
+
+
+  
+
