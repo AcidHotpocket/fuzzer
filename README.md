@@ -28,12 +28,10 @@ The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-3
 
 <b>Example usage</b><br>
 
-"replace this with an example from the command line"<br>
-
-  java fuzz test http://localhost:8080 --custom-auth=dvwa --common-words=words.txt --vectors=vectors.txt --sensitive=creditcards.txt --random=false<br>
-  java fuzz discover http://localhost:8080 --common-words=mywords.txt<br>
-  java fuzz discover http://localhost:8080 --common-words=mywords.txt<br>
+java fuzz discover http://127.0.0.1/dvwa/login.php --common-words=Z:\Fuzzer\common-words.txt<br>
 
 
-  
+<b>Notes</b><br>
+We have been running this program from eclipse as "run as configuration"
+
 
