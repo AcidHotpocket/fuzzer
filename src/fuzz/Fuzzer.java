@@ -33,7 +33,7 @@ public class Fuzzer {
 	public Fuzzer(String commonWordsFile){
 		_pages = new ArrayList<Page>();
 		_cookies = new ArrayList<String>();
-		commonWords = loadCommonWordsFile(commonWordsFile);
+		//commonWords = loadCommonWordsFile(commonWordsFile);
 		cm = new CookieManager();
 		cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 	    CookieHandler.setDefault(cm);
@@ -46,9 +46,7 @@ public class Fuzzer {
 			BufferedReader br = new BufferedReader(fr);
 			String s;
 			while((s = br.readLine()) != null){
-				if(!commonWords.contains(s)){
 					commonWords.add(s);
-				}
 			}
 			fr.close();
 		}
@@ -64,7 +62,7 @@ public class Fuzzer {
 		//get links via recursion
 		discoverLinks(baseUrl, parseURL(baseUrl));
 		//initial page guessing
-		guessPages(baseUrl);
+		//guessPages(baseUrl);
 	}
 	
 	private void guessPages(String baseUrl){
@@ -74,11 +72,11 @@ public class Fuzzer {
 				System.out.println("DISCOVER - Valid URL guessed: " + baseUrl + "/" + guess);
 				Page page = parseURL(baseUrl + "/" + guess);
 			} catch (FailingHttpStatusCodeException e) {
-				System.err.println("DISCOVER - Guessed url cannot be reached: " + baseUrl + "/" + guess);
+				//System.err.println("DISCOVER - Guessed url cannot be reached: " + baseUrl + "/" + guess);
 			} catch (MalformedURLException e){
-				System.err.println("DISCOVER - Guessed url was invalid: " + baseUrl + "/" + guess);
+				//System.err.println("DISCOVER - Guessed url was invalid: " + baseUrl + "/" + guess);
 			} catch (IOException e){
-				System.err.println("DISCOVER - Guessed url resulted in an error: " + baseUrl + "/" + guess);
+				//System.err.println("DISCOVER - Guessed url resulted in an error: " + baseUrl + "/" + guess);
 			}
 		}
 	}
@@ -95,11 +93,11 @@ public class Fuzzer {
 				}
 				
 			} catch (FailingHttpStatusCodeException e){
-				System.err.println("DISCOVER - The URL guessed was invalid: " + e.getMessage());
+				//System.err.println("DISCOVER - The URL guessed was invalid: " + e.getMessage());
 			} catch (MalformedURLException e){
-				System.err.println("DISCOVER - The URL guessed violated URL convention: " + e.getMessage());
+				//System.err.println("DISCOVER - The URL guessed violated URL convention: " + e.getMessage());
 			} catch (IOException e){
-				System.err.println("DISCOVER - Error during page guessing: " + e.getMessage());
+				//System.err.println("DISCOVER - Error during page guessing: " + e.getMessage());
 			}
 		}
 	}
@@ -120,11 +118,11 @@ public class Fuzzer {
 				}
 			}
 		} catch (FailingHttpStatusCodeException e){
-			System.err.println("DISCOVER - Invalid link: " + e.getMessage());
+			//System.err.println("DISCOVER - Invalid link: " + e.getMessage());
 		} catch (MalformedURLException e){
-			System.err.println("DISCOVER - Invalid link: " + e.getMessage());
+			//System.err.println("DISCOVER - Invalid link: " + e.getMessage());
 		} catch (IOException e){
-			System.err.println("DISCOVER - Invalid link: " + e.getMessage());
+			//System.err.println("DISCOVER - Invalid link: " + e.getMessage());
 		}
 	}
 	
@@ -156,7 +154,7 @@ public class Fuzzer {
 				}
 			}
 		} catch (MalformedURLException e) {
-			System.err.println("Invalid URL provided: " + e.getMessage());
+			//System.err.println("Invalid URL provided: " + e.getMessage());
 		}
 		return page;
 	}
@@ -195,5 +193,46 @@ public class Fuzzer {
 		discoverPages(baseUrl);
 		discoverInputs(baseUrl);
 		printDiscovery();
+	}
+	
+	public void logIn(String keyword) {
+		HtmlPage logIn = null;
+		HtmlForm logInForm = null;
+		String response;
+
+		if(keyword.toLowerCase().equals("dvwa")) {
+			//connect to the login page for dvwa
+			
+			try {
+			logIn = client.getPage("127.0.0.1/dvwa/login.php");
+			} catch(Exception e) {
+				
+			}
+			//acquire login form, set values
+			
+			logInForm = logIn.getFirstByXPath("//form[@action=login.php'");
+			logInForm.getInputByName("username").setValueAttribute("admin");
+			logInForm.getInputByName("password").setValueAttribute("password");
+			
+		}else if(keyword.toLowerCase().equals("bodgeit")) {
+			//connect to the login page for the bodgeit application
+			try {
+			logIn = client.getPage("127.0.0.1:8080/bodgeit/register.jsp");
+			}catch (Exception e) {}
+			
+			//acquire login form, set values
+			logInForm = logIn.getFirstByXPath("//form[@method='POST']");
+			logInForm.getInputByName("username").setValueAttribute("notarealemail@sharklasers.com");
+			logInForm.getInputByName("password1").setValueAttribute("password");
+			logInForm.getInputByName("password2").setValueAttribute("password");
+			
+			//then click the submit button, and check for success or failure
+			try {
+			logInForm.getInputByValue("Register").click();
+			}catch(IOException e) {}
+			
+		} else {
+			System.out.println("No hardcoded information for " + keyword +". Continuing the fuzz without login");
+		}
 	}
 }

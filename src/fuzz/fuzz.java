@@ -66,6 +66,7 @@ public class fuzz {
 		//after initializing, use the logIn method and then begin fuzzing I think
 		
 		fuzzer = new Fuzzer(commonWordsFilename);
+		fuzzer.fuzz(startingPagename);
 	}
 	
 	/*----------------------------------------------------------------------------
