@@ -28,10 +28,13 @@ The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-3
 
 <b>Example usage</b><br>
 
-java fuzz discover http://127.0.0.1/dvwa/login.php --common-words=Z:\Fuzzer\common-words.txt<br>
+java fuzz discover http://127.0.0.1/dvwa/login.php --common-words=Z:\Fuzzer\common-words.txt --custom-auth=dvwa<br>
 
 
 <b>Notes</b><br>
 We have been running this program from eclipse as "run as configuration"
+
+The authentication is not working, do not run.
+custom off is not working.
 
 
