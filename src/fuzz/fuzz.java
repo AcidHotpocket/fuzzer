@@ -11,7 +11,6 @@ public class fuzz {
 	 * 					what functionality is desired. The second is a valid URL path to
 	 * 					connect to.
 	 */
-	
 	public static void main(String[] args) {
 		
 		boolean areTesting = false;
@@ -22,15 +21,11 @@ public class fuzz {
 		Fuzzer fuzzer;
 
 		//check to ensure the first argument is either discover or test
-		
 		areTesting = testingCheck(args[0]);
 		
-		//Attempt to parse the parameters common to both discover and test.
-			
+		//Attempt to parse the parameters common to both discover and test.	
 		for(int i = 2; i < args.length; i++) {
-			
 			//parses the current argument
-			
 			if (args[i].toLowerCase().contains("--common-words=")) {
 				commonWordsFilename=args[i].substring(15);
 				haveCommonWords = true;
@@ -100,7 +95,6 @@ public class fuzz {
 				"field and test all vectors. Default: false");
 		System.err.println("		--slow=500 - Number of milliseconds considered when a response " +
 				"is considered \"slow\". Default is 500 milliseconds");
-		
 	}
 	
 	/*-------------------------------------------------------------------------
@@ -112,13 +106,10 @@ public class fuzz {
 	 * @return testCheck boolean value determining if the fuzzer is just discovering
 	 * 						or also testing
 	 --------------------------------------------------------------------------*/
-	
 	private static boolean testingCheck(String command) {
 		boolean testCheck = false;
-		
 		//check for either "discover" or "test". If neither, return error
 		//and man-page messages then terminate the program
-		
 		if(command.toLowerCase().equals("discover")) {
 			testCheck = false; //we aren't testing
 		}else if(command.toLowerCase().equals("test")) {

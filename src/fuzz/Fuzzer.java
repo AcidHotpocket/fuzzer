@@ -192,7 +192,6 @@ public class Fuzzer {
 
         if(keyword.toLowerCase().equals("dvwa")) {
             //connect to the login page for dvwa
-            
             try {
             logIn = client.getPage("http://127.0.0.1/dvwa/login.php");
             } catch(Exception e) {
