@@ -1,7 +1,7 @@
 package fuzz;
 
-import java.io.IOException;
-import java.net.URL;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
 
 public class fuzz {
 
@@ -19,17 +19,14 @@ public class fuzz {
 		
 		boolean areTesting = false;
 		boolean haveCommonWords = false;
-		URL startingPage;
-		String startingPagename;
+		String startingPagename = args[1];
 		String commonWordsFilename = new String("");
 		String customAuthorize = "";
-		Utils client = new Utils();
+		Fuzzer fuzzer;
 
 		//check to ensure the first argument is either discover or test
 		
 		areTesting = testingCheck(args[0]);
-		
-		startingPagename = args[1];  //set second argument
 		
 		//Attempt to parse the parameters common to both discover and test.
 			
@@ -43,8 +40,7 @@ public class fuzz {
 				
 				//if no filename provided to common-words argument, throw error
 				if (commonWordsFilename.equals("")) {
-					System.err.println("Error: no filename provided");
-					manMessage();
+					manMessage("no filename provided");
 					System.exit(1);
 				}	
 			} else if(args[i].toLowerCase().contains("--custom-auth=")) {
@@ -52,33 +48,35 @@ public class fuzz {
 				
 				//if no value for the custom authorization is given, throw error
 				if (customAuthorize.equals("")) {
-					manMessage();
+					manMessage("no value provided for argument \"--custom-auth\"");
 					System.exit(1);
 				}
 			} else {
-				System.err.println("Error: invalid option " + args[i]);
-				manMessage();
+				manMessage("invalid option " + args[i]);
 				System.exit(1);
 			}
 		}
 		
 		//try to load the common-words file into the Utils client
-		
-		try {
-			client.loadCommonWordsFile(commonWordsFilename);
-		}catch(IOException e) {
-			System.err.println("Error with loading file");
+		if(!haveCommonWords) {
+			manMessage("argument --common-words=file required");
 			System.exit(1);
 		}
+		//initialize the Fuzzer object here with String : commonWordsFilename
+		//after initializing, use the logIn method and then begin fuzzing I think
 		
+		fuzzer = new Fuzzer(commonWordsFilename);
 	}
 	
 	/*----------------------------------------------------------------------------
 	 * Method to print out the man page message in the case of invalid parameters,
 	 * 	whether it be of wrong type or too few.
+	 * 
+	 * @param error  Custom error message for each unique situation
 	 -----------------------------------------------------------------------------*/
 	
-	private static void manMessage() {
+	private static void manMessage(String error) {
+		System.err.println("Error: " + error);
 		System.err.println("fuzz [discover | test] url OPTIONS\n");
 		System.err.println("COMMANDS:");
 		System.err.println("\tdiscover - Output a comprehensive, " +
@@ -92,14 +90,14 @@ public class fuzz {
 		System.err.println("	Discover options:");
 		System.err.println("		--common-words=file - Newline-delimited " +
 				"file of common words to be used in " +
-				"page guessing and input guessing.\n");
+				"page guessing and input guessing. Required.\n");
 		System.err.println("	Test options:");
 		System.err.println("		--vectors=file - Newline-delimited file of " +
-				"common exploits to vulnerabilities.");
+				"common exploits to vulnerabilities. Required.");
 		System.err.println("		--sensitive=file - Newline-delimited file data " +
-				"that should never be leaked.");
+				"that should never be leaked. Required.");
 		System.err.println("		--random=[true|false] - When off, try each input to each " +
-				"page systematically. When on, choose a random page, then a random input " +
+				"page systematically.\n\t\t\t When on, choose a random page, then a random input " +
 				"field and test all vectors. Default: false");
 		System.err.println("		--slow=500 - Number of milliseconds considered when a response " +
 				"is considered \"slow\". Default is 500 milliseconds");
@@ -126,10 +124,9 @@ public class fuzz {
 			testCheck = false; //we aren't testing
 		}else if(command.toLowerCase().equals("test")) {
 			testCheck = true; //we are testing
-		
+			System.out.println("We testing in this program!");
 		}else {
-			System.err.println("Error: first argument must be \"discover\" or \"test\"");
-			manMessage();
+			manMessage("first argument must be \"discover\" or \"test\"");
 			System.exit(1);
 		}
 		return testCheck;
