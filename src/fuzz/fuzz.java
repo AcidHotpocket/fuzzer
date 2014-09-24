@@ -1,7 +1,7 @@
 package fuzz;
 
-import java.net.*;
-import java.io.*;
+import java.io.IOException;
+import java.net.URL;
 
 public class fuzz {
 
@@ -10,68 +10,67 @@ public class fuzz {
 	 * 	inputs. After, it will either list all inputs and input types to the terminal or
 	 * 	will test inputs with provided attack vectors.
 	 * 
-	 * @param args
+	 * @param args - needs at least two arguments. First is [discover | test] depending on
+	 * 					what functionality is desired. The second is a valid URL path to
+	 * 					connect to.
 	 */
+	
 	public static void main(String[] args) {
 		
 		boolean areTesting = false;
+		boolean haveCommonWords = false;
 		URL startingPage;
-		BufferedReader reader;
-		
-		/*-------------------------------------------------------------------
-		 * Checks to see if the minimum number of parameters are applied and if
-		 * the first parameter is either "discover" or "test". If either of these
-		 * checks fail, an error is thrown and the man page is printed before 
-		 * terminating the program. 
-		 -----------------------------------------------------------------------*/
-		
-		if(args.length < 2) {
-			System.err.println("Error: too few parameters");
-			manMessage();
-			System.exit(1);
-		}else if(args[0].equals("discover")) {
-			System.out.println("We discovering!");
-			areTesting = false;
-		}else if(args[0].equals("test")) {
-			System.out.println("We testing!");
-			areTesting = true;
-		}else {
-			System.err.println("Error: first argument must be \"discover\" or \"test\"");
-			manMessage();
-			System.exit(1);
-		}
+		String startingPagename;
+		String commonWordsFilename = new String("");
+		String customAuthorize = "";
+		Utils client = new Utils();
 
-		// attempt to take the second argument and turn it into a URL object.
+		//check to ensure the first argument is either discover or test
 		
-		try {
-			startingPage = new URL(args[1]);
-			System.out.println("It's a url all right!");
-		}catch(MalformedURLException e) {
-			System.err.println("Error: Invalid URL");
-			manMessage();
-			System.exit(1);
-		} 
+		areTesting = testingCheck(args[0]);
 		
-		//Attempt to parse the rest of the parameters. Will attempt to get different
-		//parameters depending on which command was used.
+		startingPagename = args[1];  //set second argument
 		
-		if((args.length >= 3) && !areTesting) {
-			System.out.println("there are more parameters for discovering!");
+		//Attempt to parse the parameters common to both discover and test.
 			
-			for(int i = 2; i < args.length; i++) {
-				if (args[i].contains("--common-words")) {
-					System.out.println("we getting common words!");
-				} else if(args[i].contains("--custom-auth")) {
-					System.out.println("using the hardcoded authentication!");
-				} else {
-					System.err.println("Error: invalid option " + args[i]);
+		for(int i = 2; i < args.length; i++) {
+			
+			//parses the current argument
+			
+			if (args[i].toLowerCase().contains("--common-words=")) {
+				commonWordsFilename=args[i].substring(15);
+				haveCommonWords = true;
+				
+				//if no filename provided to common-words argument, throw error
+				if (commonWordsFilename.equals("")) {
+					System.err.println("Error: no filename provided");
+					manMessage();
+					System.exit(1);
+				}	
+			} else if(args[i].toLowerCase().contains("--custom-auth=")) {
+				customAuthorize=args[i].substring(14);
+				
+				//if no value for the custom authorization is given, throw error
+				if (customAuthorize.equals("")) {
 					manMessage();
 					System.exit(1);
 				}
+			} else {
+				System.err.println("Error: invalid option " + args[i]);
+				manMessage();
+				System.exit(1);
 			}
-		}else if((args.length >= 3) && areTesting) {
-			System.out.println("there are more parameters for testing!");
 		}
+		
+		//try to load the common-words file into the Utils client
+		
+		try {
+			client.loadCommonWordsFile(commonWordsFilename);
+		}catch(IOException e) {
+			System.err.println("Error with loading file");
+			System.exit(1);
+		}
+		
 	}
 	
 	/*----------------------------------------------------------------------------
@@ -82,7 +81,7 @@ public class fuzz {
 	private static void manMessage() {
 		System.err.println("fuzz [discover | test] url OPTIONS\n");
 		System.err.println("COMMANDS:");
-		System.err.println("	discover - Output a comprehensive, " +
+		System.err.println("\tdiscover - Output a comprehensive, " +
 				"human-readable list of all discovered inputs " +
 				"to the system.");
 		System.err.println("	test - Discover all inputs, then attempt a " +
@@ -106,5 +105,33 @@ public class fuzz {
 				"is considered \"slow\". Default is 500 milliseconds");
 		
 	}
-
+	
+	/*-------------------------------------------------------------------------
+	 * Method to check the first parameter for the correct command
+	 * 
+	 * @param command  The string containing the first argument from when the
+	 * 					program is called
+	 * 
+	 * @return testCheck boolean value determining if the fuzzer is just discovering
+	 * 						or also testing
+	 --------------------------------------------------------------------------*/
+	
+	private static boolean testingCheck(String command) {
+		boolean testCheck = false;
+		
+		//check for either "discover" or "test". If neither, return error
+		//and man-page messages then terminate the program
+		
+		if(command.toLowerCase().equals("discover")) {
+			testCheck = false; //we aren't testing
+		}else if(command.toLowerCase().equals("test")) {
+			testCheck = true; //we are testing
+		
+		}else {
+			System.err.println("Error: first argument must be \"discover\" or \"test\"");
+			manMessage();
+			System.exit(1);
+		}
+		return testCheck;
+	}
 }
