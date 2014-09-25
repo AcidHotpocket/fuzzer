@@ -15,6 +15,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
 
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -27,20 +28,22 @@ public class Fuzzer {
 
 	private List<Page> _pages;
 	private List<String> _cookies;
-	private ArrayList<String> commonWords = new ArrayList<String>();
+	private ArrayList<String> _commonWords = new ArrayList<String>();
 	
 	private CookieManager cm;
 	
 	private WebClient client;
+    private String baseUrl;
 	
 	public Fuzzer(String commonWordsFile){
 		_pages = new ArrayList<Page>();
 		_cookies = new ArrayList<String>();
-		commonWords = loadCommonWordsFile(commonWordsFile);
+		_commonWords = loadCommonWordsFile(commonWordsFile);
 		cm = new CookieManager();
 		cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 	    CookieHandler.setDefault(cm);
 		client = new WebClient();
+        java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 	}
 	
 	public ArrayList<String> loadCommonWordsFile(String fileName){
@@ -48,23 +51,26 @@ public class Fuzzer {
 		try {
 			input = new Scanner(new File(fileName));
 			while (input.hasNext()) {
-				commonWords.add(input.nextLine());
+				String s = input.nextLine();
+                _commonWords.add(s);
+                _commonWords.add(s + ".php");
+                _commonWords.add(s + ".jsp");
 			}
 		} catch (FileNotFoundException e) {
 			System.err.println("common words error: " + e.getMessage());
 		}
-		return commonWords;
+		return _commonWords;
 	}
 	
-	private void discoverPages(String baseUrl){
+	private void discoverPages(){
 		//get links via recursion
 		discoverLinks(baseUrl, parseURL(baseUrl));
 		//initial page guessing
-		guessPages(baseUrl);
+		guessPages();
 	}
 	
-	private void guessPages(String baseUrl){
-		for(String guess: commonWords){
+	private void guessPages(){
+		for(String guess: _commonWords){
 			try{
 				HtmlPage html = client.getPage(baseUrl + "/" + guess);
 				System.out.println("DISCOVER - Valid URL guessed: " + baseUrl + "/" + guess);
@@ -79,12 +85,11 @@ public class Fuzzer {
 		}
 	}
 	
-	private void discoverInputs(String baseUrl){
+	private void discoverForms(){
 		//find all forms from each page discovered
 		for (Page page: _pages){
 			try{
-				HtmlPage html = client.getPage(baseUrl + page.getURL());
-				
+				HtmlPage html = client.getPage(this.baseUrl + "/" + page.getURL());
 				List<HtmlForm> forms = html.getForms();
 				for (HtmlForm form: forms){
 					page.getForms().add(form);
@@ -100,19 +105,19 @@ public class Fuzzer {
 		}
 	}
 	
-	private void discoverLinks(String baseUrl, Page page){
+	private void discoverLinks(String url, Page page){
 		try{
-			HtmlPage html = client.getPage(baseUrl);
+			HtmlPage html = client.getPage(url);
 			List<HtmlAnchor> links = html.getAnchors();
 			for (HtmlAnchor link: links){
-				URL temp_url = new URL(baseUrl + "/" + link.getHrefAttribute());
+				URL temp_url = new URL(this.baseUrl + "/" + link.getHrefAttribute());
 				if (!_pages.contains(new Page(temp_url.getPath()))) {
-					Page temp_page = parseURL(baseUrl + "/" + link.getHrefAttribute());
-					discoverCookies(temp_url);
-					discoverLinks(baseUrl + "/" + link.getHrefAttribute(), temp_page);
+					Page temp_page = parseURL(this.baseUrl + "/" + link.getHrefAttribute());
+					//discoverCookies(temp_url);
+					discoverLinks(this.baseUrl + "/" + link.getHrefAttribute(), temp_page);
 				}
 				else {
-					parseURL(baseUrl + "/" + link.getHrefAttribute());
+					parseURL(this.baseUrl + "/" + link.getHrefAttribute());
 				}
 			}
 		} catch (FailingHttpStatusCodeException e){
@@ -124,27 +129,26 @@ public class Fuzzer {
 		}
 	}
 	
-	private Page parseURL(String baseUrl){
+	private Page parseURL(String url){
 		Page page = null;
 		try{
-			URL url = new URL(baseUrl);
+			URL temp = new URL(url);
 			//if page is already in the list
-			if (_pages.contains(new Page(url.getPath()))) {
-				for (Page check: _pages){
-					if (check.getURL().equals(url.getPath())) {
-						page = check;
+			if (_pages.contains(new Page(temp.getPath()))) {
+				for (Page p: _pages){
+					if (p.getURL().equals(temp.getPath())) {
+						page = p;
 						break;
 					}
 				}
 			}
 			else {
-				page = new Page(url.getPath());
+				page = new Page(temp.getPath());
 				_pages.add(page);
 			}
-			
 			//get query and find fizzed inputs
-			if (url.getQuery() != null) {
-				for (String query: url.getQuery().split("&")) {
+			if (temp.getQuery() != null) {
+				for (String query: temp.getQuery().split("&")) {
 					String input = query.split("=")[0];
 					if (!page.getInputs().contains(input)) {
 						page.getInputs().add(input);
@@ -170,18 +174,18 @@ public class Fuzzer {
 	private void printDiscovery(){
 		System.out.println("\nCookies: " + _cookies.size());
 		for(String c: _cookies){
-			System.out.println("\t" + c);
+			System.out.println("\tcookie: " + c);
 		}
-		System.out.println("\nValid pages discovered: ");
+		System.out.println("\nValid pages discovered: " +_pages.size());
 		for(Page p: _pages){
-			System.out.println(p.getURL());
-			System.out.println("URL Inputs: " + p.getInputs().size());
+			System.out.println("url: " + p.getURL());
+			System.out.println("\tURL Inputs: " + p.getInputs().size());
 			for(String url: p.getInputs()){
-				System.out.println("\t" + url);
+				System.out.println("\t\turl: " + url);
 			}
-			System.out.println("Form Inputs: " + p.getForms().size());
+			System.out.println("\tForm Inputs: " + p.getForms().size());
 			for(HtmlForm form: p.getForms()){
-				System.out.println("\t" + form);
+				System.out.println("\t\tform: " + form);
 			}
 		}
 	}
@@ -197,15 +201,18 @@ public class Fuzzer {
             } catch(Exception e) {
                 e.printStackTrace();
             }
+            //form[@action=login.php]
             //acquire login form, set values
+            logInForm = logIn.getFirstByXPath("/html/body/div/form");
+            logInForm.getInputByName("username").setValueAttribute("admin");
+            logInForm.getInputByName("password").setValueAttribute("password");
+            try{
+                logInForm.getInputByName("Login").click();
+            } catch (IOException e){
+                System.out.println("Error logging in: " + e.getMessage());
+            }
             
-            logInForm = logIn.getFirstByXPath("//form[@action=login.php]");
-            HtmlInput name = logInForm.getInputByName("username");
-            name.setValueAttribute("admin");
-            HtmlInput pw = logInForm.getInputByName("password");
-            pw.setValueAttribute("password");
-            
-        }else if(keyword.toLowerCase().equals("bodgeit")) {
+        } else if(keyword.toLowerCase().equals("bodgeit")) {
             //connect to the login page for the bodgeit application
             try {
             logIn = client.getPage("http://127.0.0.1:8080/bodgeit/register.jsp");
@@ -214,7 +221,7 @@ public class Fuzzer {
             }
             
             //acquire login form, set values
-            logInForm = logIn.getFirstByXPath("//form[@method='POST']");
+            logInForm = logIn.getFirstByXPath(".//form[@method='POST']");
             logInForm.getInputByName("username").setValueAttribute("notarealemail@sharklasers.com");
             logInForm.getInputByName("password1").setValueAttribute("password");
             logInForm.getInputByName("password2").setValueAttribute("password");
@@ -229,10 +236,13 @@ public class Fuzzer {
         }
     }
 	
-	public void fuzz(String baseUrl){
+	public void fuzz(String baseUrl, String auth){
+        this.baseUrl = baseUrl;
 		System.out.println("Starting discovery process for: " + baseUrl);
-		discoverPages(baseUrl);
-		discoverInputs(baseUrl);
+		discoverPages();
+        logIn(auth);
+		discoverForms();
 		printDiscovery();
+        client.closeAllWindows();
 	}
 }

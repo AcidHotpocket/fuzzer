@@ -56,10 +56,8 @@ public class fuzz {
 		}
 		//initialize the Fuzzer object here with String : commonWordsFilename
 		//after initializing, use the logIn method and then begin fuzzing I think
-		
 		fuzzer = new Fuzzer(commonWordsFilename);
-		fuzzer.logIn(customAuthorize);
-		fuzzer.fuzz(startingPagename);
+		fuzzer.fuzz(startingPagename, customAuthorize);
 	}
 	
 	/*----------------------------------------------------------------------------
