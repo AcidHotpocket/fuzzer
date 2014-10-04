@@ -11,8 +11,8 @@ The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-3
 
 <b>Installation</b><br>
 <ol>
-	<li>Copy this repository to your workspace</li>
-	<li>Run program from the command line</li>
+	<li>Download fuzz.jar</li>
+	<li>Run program from the command line (in the directory of the fuzz.jar file)</li>
 </ol>
 
 <b>Project Setup</b><br>
@@ -23,17 +23,15 @@ The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-3
 <b>Dependencies</b><br>
 <ul>
 	<li>Java 1.6</li>
-	<li>Jsoup</li>
+	<li>HTMLUnit</li>
 </ul>
 
 <b>Example usage</b><br>
 
-java fuzz discover http://127.0.0.1/dvwa/login.php --common-words=Z:\Fuzzer\common-words.txt --custom-auth=dvwa<br>
+java jar fuzz.jar discover http://127.0.0.1/dvwa/login.php --common-words=Z:\Fuzzer\common-words.txt<br>
 
 
 <b>Notes</b><br>
-We have been running this program from eclipse as "run as configuration"
-
 The authentication is not working, do not run.
 custom off is not working.
 
