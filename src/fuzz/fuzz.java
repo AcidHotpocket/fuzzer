@@ -15,15 +15,22 @@ public class fuzz {
 		
 		boolean areTesting = false;
 		boolean haveCommonWords = false;
+		boolean haveVectors = false;
+		boolean haveSensitive = false;
+		boolean randomTest = false;
 		String startingPagename = args[1];
 		String commonWordsFilename = new String("");
+		String sensitiveFilename = "";
 		String customAuthorize = "";
+		String vectorsFilename = "";
+		int slowTime = 500;
 		Fuzzer fuzzer;
 
 		//check to ensure the first argument is either discover or test
 		areTesting = testingCheck(args[0]);
 		
-		//Attempt to parse the parameters common to both discover and test.	
+		//Attempt to parse the parameters
+		
 		for(int i = 2; i < args.length; i++) {
 			//parses the current argument
 			if (args[i].toLowerCase().contains("--common-words=")) {
@@ -43,21 +50,74 @@ public class fuzz {
 					manMessage("no value provided for argument \"--custom-auth\"");
 					System.exit(1);
 				}
+			} else if(areTesting && args[i].toLowerCase().contains("--random=")) {
+				
+				//if the argument contains "true", set the randomTest flag to true.
+				//otherwise, leave randomTest flag false
+				
+				if (args[i].toLowerCase().contains("true")) {
+					randomTest = true;
+				}
+			} else if(areTesting && args[i].toLowerCase().contains("--vectors=")) {
+				vectorsFilename = args[i].substring(10);
+				haveVectors = true;
+				//if no value is given for the vectors filename, throw error
+				if(vectorsFilename.equals("")) {
+					manMessage("no value provided for argument \"--vectors\"");
+					System.exit(1);
+				}
+			} else if(areTesting && args[i].toLowerCase().contains("--slow=")) {
+				if (!args[i].substring(7).equals("")) {
+					try {
+						slowTime = Integer.parseInt(args[i].substring(7));
+						if (slowTime < 0) {
+							manMessage("must use a non-negative number for argument \"--slow\"");
+							System.exit(1);
+						}
+					}catch(NumberFormatException e) {
+						manMessage("invalid argument for argument \"--slow\"");
+						System.exit(1);
+					}
+				} else {
+					manMessage("no value provided for argument \"--slow\"");
+					System.exit(1);
+				}
+			} else if (areTesting && args[i].toLowerCase().contains("--sensitive=")) {
+				if (!args[i].substring(12).equals("")) {
+					sensitiveFilename = args[i].substring(12);
+					haveSensitive = true;
+				} else {
+					manMessage("no value for argument \"--sensitive\"");
+					System.exit(1);
+				}
 			} else {
 				manMessage("invalid option " + args[i]);
 				System.exit(1);
 			}
 		}
 		
-		//try to load the common-words file into the Utils client
-		if(!haveCommonWords) {
+		//check to ensure that the common words file exists
+		if(!areTesting && !haveCommonWords) {
 			manMessage("argument --common-words=file required");
+			System.exit(1);
+		}
+		
+		//if testing, ensure vectors argument was given
+		if(areTesting && !haveVectors) {
+			manMessage("argument --vectors=file required");
+			System.exit(1);
+		}
+		
+		//if testing, ensure sensitive file argument was given
+		if(areTesting && !haveSensitive) {
+			manMessage("argument --sensitive=file required");
 			System.exit(1);
 		}
 		//initialize the Fuzzer object here with String : commonWordsFilename
 		//after initializing, use the logIn method and then begin fuzzing I think
 		fuzzer = new Fuzzer(commonWordsFilename);
-		fuzzer.fuzz(startingPagename, customAuthorize);
+	//	fuzzer.fuzz(startingPagename, customAuthorize);
+		System.out.println("Command line works");
 	}
 	
 	/*----------------------------------------------------------------------------
@@ -112,7 +172,6 @@ public class fuzz {
 			testCheck = false; //we aren't testing
 		}else if(command.toLowerCase().equals("test")) {
 			testCheck = true; //we are testing
-			System.out.println("We testing in this program!");
 		}else {
 			manMessage("first argument must be \"discover\" or \"test\"");
 			System.exit(1);
