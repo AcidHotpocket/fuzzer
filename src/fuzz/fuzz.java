@@ -115,7 +115,7 @@ public class fuzz {
 		}
 		//initialize the Fuzzer object here with String : commonWordsFilename
 		//after initializing, use the logIn method and then begin fuzzing I think
-		fuzzer = new Fuzzer(commonWordsFilename, vectorsFilename, sensitiveFilename, randomTest);
+		fuzzer = new Fuzzer(commonWordsFilename, vectorsFilename, sensitiveFilename, randomTest, slowTime);
 		fuzzer.fuzz(startingPagename, customAuthorize);
 	}
 	

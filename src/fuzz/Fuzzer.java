@@ -1,9 +1,7 @@
 package fuzz;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.CookieManager;
 import java.net.CookieHandler;
@@ -17,13 +15,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
-
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
-import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.*;
-
-import javax.lang.model.element.Element;
 
 public class Fuzzer {
 
@@ -33,14 +27,13 @@ public class Fuzzer {
     private ArrayList<String> _sensitiveData = new ArrayList<String>();
     private ArrayList<String> _vectors = new ArrayList<String>();
     private boolean randomFlag = false;
+    
     private Random random;
-	
 	private CookieManager cm;
-	
-	private WebClient client;
+	private TimedWebClient client;
     private String baseUrl;
 	
-	public Fuzzer(String commonWordsFile, String vectorsFile, String sensitiveDataFile, boolean randomFlag){
+	public Fuzzer(String commonWordsFile, String vectorsFile, String sensitiveDataFile, boolean randomFlag, long time){
 		_pages = new ArrayList<Page>();
 		_cookies = new ArrayList<String>();
 		_commonWords = loadCommonWordsFile(commonWordsFile);
@@ -50,7 +43,7 @@ public class Fuzzer {
 		cm = new CookieManager();
 		cm.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 	    CookieHandler.setDefault(cm);
-		client = new WebClient();
+		client = new TimedWebClient(time);
         random = new Random();
         java.util.logging.Logger.getLogger("com.gargoylesoftware").setLevel(Level.OFF);
 	}
@@ -120,6 +113,7 @@ public class Fuzzer {
 	}
 	
 	private void discoverForms(){
+		System.out.println("\nDiscovering all forms from discovered pages.");
 		//find all forms from each page discovered
 		for (Page p: _pages){
 			try{
@@ -275,6 +269,7 @@ public class Fuzzer {
     }
 
     private void testFullPage(Page page){
+    	System.out.println("\nBeginning testing of page: " + page.getURL());
         for(String input: page.getInputs()){
             String base = baseUrl + page.getURL() + "?" + input + "=";
             for(String s: _vectors){
@@ -315,6 +310,7 @@ public class Fuzzer {
     }
 
     private boolean testRandomPage(Page page){
+    	System.out.println("Beginning testing of random page: " + page.getURL());
         boolean isSelect = false;
         if(page.getForms().size() > 0 && page.getInputs().size() > 0){
             int rand = random.nextInt(2);
@@ -355,6 +351,7 @@ public class Fuzzer {
                 HtmlPage html = client.getPage(base);
                 checkForBadData(page, html);
             } catch (FailingHttpStatusCodeException e){
+            	System.err.println("Random Input Test failed - Failing HTTP Response encountered");
             } catch (MalformedURLException e){
             } catch (IOException e){
             }
@@ -374,11 +371,6 @@ public class Fuzzer {
 	}
 	
 	private void print(){
-		/*System.out.println("\nCookies: " + _cookies.size());
-		for(String c: _cookies){
-			System.out.println("\tcookie: " + c);
-		}*/
-
 		System.out.println("\nValid pages discovered: " +_pages.size());
 		for(Page p: _pages){
 			System.out.println("url: " + p.getURL());
@@ -415,6 +407,7 @@ public class Fuzzer {
             logInForm.getInputByName("password").setValueAttribute("password");
             try{
                 logInForm.getInputByName("Login").click();
+                baseUrl = "http://127.0.0.1/dvwa";
             } catch (IOException e){
                 System.out.println("Error logging in: " + e.getMessage());
             }
@@ -446,8 +439,8 @@ public class Fuzzer {
 	public void fuzz(String baseUrl, String auth){
         this.baseUrl = baseUrl;
 		System.out.println("Starting discovery process for: " + baseUrl);
+		logIn(auth);
 		discoverPages();
-        logIn(auth);
 		discoverForms();
         testStart();
 		print();
