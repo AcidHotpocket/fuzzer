@@ -8,28 +8,35 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 public class Page {
 
 	private String url;
-	private List<HtmlForm> forms;
-	private List<String> inputs;
+	private List<HtmlForm> _forms;
+	private List<String> _inputs;
+    private List<String> _sensitiveData;
 	
 	public Page(){
 		url = new String();
-		forms = new ArrayList<HtmlForm>();
-		inputs = new ArrayList<String>();
+		_forms = new ArrayList<HtmlForm>();
+		_inputs = new ArrayList<String>();
+        _sensitiveData = new ArrayList<String>();
 	}
 	
 	public Page(String url){
 		this.url = url;
-		forms = new ArrayList<HtmlForm>();
-		inputs = new ArrayList<String>();
+		_forms = new ArrayList<HtmlForm>();
+		_inputs = new ArrayList<String>();
+        _sensitiveData = new ArrayList<String>();
 	}
 	
 	public List<HtmlForm> getForms(){
-		return forms;
+		return _forms;
 	}
 	
 	public List<String> getInputs(){
-		return inputs;
+		return _inputs;
 	}
+
+    public List<String> getSensitiveData(){
+        return _sensitiveData;
+    }
 	
 	public String getURL(){
 		return url;

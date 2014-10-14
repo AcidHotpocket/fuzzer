@@ -115,9 +115,8 @@ public class fuzz {
 		}
 		//initialize the Fuzzer object here with String : commonWordsFilename
 		//after initializing, use the logIn method and then begin fuzzing I think
-		fuzzer = new Fuzzer(commonWordsFilename);
-	//	fuzzer.fuzz(startingPagename, customAuthorize);
-		System.out.println("Command line works");
+		fuzzer = new Fuzzer(commonWordsFilename, vectorsFilename, sensitiveFilename, randomTest);
+		fuzzer.fuzz(startingPagename, customAuthorize);
 	}
 	
 	/*----------------------------------------------------------------------------
