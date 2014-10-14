@@ -1,6 +1,6 @@
 <b>Fuzzer</b>
 
-The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-331/projects/fuzzer/
+The fuzzer project for software security: http://www.se.rit.edu/~swen-331/projects/fuzzer/
 
 <b>Project Team:</b>
 <ul>
@@ -11,13 +11,13 @@ The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-3
 
 <b>Installation</b><br>
 <ol>
-	<li>Download fuzz.jar</li>
-	<li>Run program from the command line (in the directory of the fuzz.jar file)</li>
+	<li>Download fuzz.jar from dropbox</li>
+	<li>Run program from the terminal, see example usage on how to run it.</li>
 </ol>
 
 <b>Project Setup</b><br>
 <ul>
-	<li>Testing, input discovery, resources is all in the package.</li>
+	<li>Testing, input discovery, resources is all in the package/jar/zip.</li>
 </ul>
 
 <b>Dependencies</b><br>
@@ -27,12 +27,12 @@ The fabulous fuzzer project for software security: http://www.se.rit.edu/~swen-3
 </ul>
 
 <b>Example usage</b><br>
+You will have to provide your own directory. <br>
 
-java jar fuzz.jar discover http://127.0.0.1/dvwa/login.php --common-words=Z:\Fuzzer\common-words.txt<br>
+java jar fuzz.jar discover http://127.0.0.1/dvwa/login.php --common-words=Z:\Fuzzer\common-words.txt --vectors=Z:\Fuzzer\vectors.txt --sensitive=Z:\Fuzzer\sensitive-data.txt --custom-auth=dvwa<br>
 
 
 <b>Notes</b><br>
-The authentication is not working, do not run.
-custom off is not working.
+As long as you are on a RIT school computer and follow the manual page that is found in the course website under the fuzzer section, you do not need to download any dependencies.
 
 
